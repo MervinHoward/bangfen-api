@@ -10,14 +10,14 @@ class OrderRepository
     public function getPendingOrder()
     {
         return Order::where('status', 'pending')
-            ->with(['table', 'items.menu'])
+            ->with(['items.menu'])
             ->latest('date')
             ->get();
     }
 
     public function getById(int $id)
     {
-        $order = Order::with(['table', 'items.menu', 'payment'])
+        $order = Order::with(['items.menu', 'payment'])
             ->findOrFail($id);
         return $order;
     }
