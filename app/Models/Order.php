@@ -10,16 +10,11 @@ class Order extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'table_id',
         'date',
         'order_type',
         'total_price',
         'status'
     ];
-
-    public function table() {
-        return $this->belongsTo(Table::class, 'table_id');
-    }
 
     public function items() {
         return $this->hasMany(OrderItem::class, 'order_id');
