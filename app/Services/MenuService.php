@@ -6,18 +6,31 @@ use App\Repositories\MenuRepository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
-class MenuService {
+class MenuService
+{
     private MenuRepository $menuRepository;
 
-    public function __construct(MenuRepository $menuRepository) {
+    public function __construct(MenuRepository $menuRepository)
+    {
         $this->menuRepository = $menuRepository;
     }
 
-    public function getAvailableMenu() {
-        return $this->menuRepository->getAvailableMenu();
+    public function getAllMenu()
+    {
+        $menus = $this->menuRepository->getAllMenu();
+        return $menus->groupBy(function ($menu) {
+            return $menu->category->name;
+        });
     }
 
-    public function createMenu(array $data) {
+    public function getMenuById(int $id)
+    {
+        $menu = $this->menuRepository->findById($id);
+        return $menu;
+    }
+
+    public function createMenu(array $data)
+    {
         if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
             $path = $data['image']->store('menus', 'public');
             $data['image'] = $path;
@@ -25,7 +38,8 @@ class MenuService {
         return $this->menuRepository->create($data);
     }
 
-    public function updateMenu(int $id, array $data) {
+    public function updateMenu(int $id, array $data)
+    {
         $menu = $this->menuRepository->findById($id);
         if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
             if ($menu->image) {
@@ -37,7 +51,8 @@ class MenuService {
         return $this->menuRepository->update($id, $data);
     }
 
-    public function changeStatus(int $id) {
-        return $this->menuRepository->update($id, ['status', false]);
+    public function delete(int $id)
+    {
+        return $this->menuRepository->delete($id);
     }
 }

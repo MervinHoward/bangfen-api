@@ -6,6 +6,7 @@ use App\Repositories\MenuRepository;
 use App\Repositories\OrderRepository;
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
@@ -53,10 +54,12 @@ class OrderService
                     'subtotal' => $subtotal
                 ]);
             }
-            return $this->orderRepository->update(
+            $order = $this->orderRepository->update(
                 $order->id,
                 ['total_price' => $total_price]
             );
+            Log::info(json_encode($order));
+            return $order->load(['items.menu', 'payment']);
         });
     }
 
@@ -85,9 +88,11 @@ class OrderService
                 }
                 $updatedOrder = $this->orderRepository->getById($id);
                 $newTotal = $updatedOrder->items->sum('subtotal');
-                return $this->orderRepository->update($id, [
+                $order = $this->orderRepository->update($id, [
                     'total_price' => $newTotal
                 ]);
+                Log::info(json_encode($updatedOrder));
+                return $order->load(['items.menu', 'payment']);
             }
         });
     }
@@ -108,10 +113,5 @@ class OrderService
             $this->orderRepository->update($id, ['status' => 'paid']);
             return $order->load(['items.menu', 'payment']);
         });
-    }
-
-    public function cancelOrder(int $id) {
-        $order = $this->orderRepository->update($id, ['status' => 'cancelled']);
-        return $order;
     }
 }
